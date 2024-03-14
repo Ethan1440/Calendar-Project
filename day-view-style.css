@@ -1,0 +1,131 @@
+#form_name {
+    font-weight: bold;
+  }
+  
+  #form_desc {
+    font-weight: bold;
+  }
+  
+  #form_date {
+    font-weight: bold;
+  }
+  
+  .task {
+    font-size: 13.5px;
+  }
+  
+  #extra_tasks {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /*Task day view Styling */
+  .day-view-header {
+    background-color: rgb(41, 216, 158);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 30px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    width: 80%;
+    margin: 0 auto;
+    border-radius: 5px;
+  }
+  
+  #day-view-back-button {
+    height: 50px;
+    width: 60px;
+    user-select: none;
+  }
+  
+  #day-view-header-txt {
+    position: absolute;
+    flex: 0 1 auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .day-view-header.inactive {
+    transition: 200ms ease-in-out;
+    display: none;
+  }
+  
+  .day-view-container.inactive {
+    transition: 200ms ease-in-out;
+    display: none;
+  }
+  
+  .day-view-container {
+    display: flex;
+    height: fit-content;
+    width: 80%;
+    margin: 0 auto;
+    flex-direction: column;
+    border: 2px black solid;
+    border-radius: 10px;
+    align-items: center;
+    margin-top: .5%;
+    padding-top: 1%;
+    padding-bottom: 1%;
+  }
+  
+  .task-container {
+    max-width: 80%;
+    width: 60%;
+    height: fit-content;
+    max-height: 300px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 7px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    align-items: flex-start;
+    background-color: rgb(41, 216, 158);
+    box-shadow: 5px 5px 10px rgb(117, 117, 117);
+  }
+  
+  .task-name {
+    margin-bottom: 10px;
+    font-size: 15px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 8px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  .task-desc {
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 8px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  .task-date {
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 8px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  button.day-view {
+    position: absolute;
+    left: 71.4%;
+    transform: translate(0, 4.5px);
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 15px;
+    font-weight: bold;
+    flex: 0 1 auto;
+    user-select: none;
+  }

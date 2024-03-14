@@ -1,0 +1,83 @@
+.modal{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) scale(0);   /*centers and hides modal*/
+    transition: 200ms ease-in-out;
+    border: 1px solid black;
+    border-radius: 10px;
+    z-index: 10; /*Draws modal above all other elements*/
+    background-color: white; /*to stand out over overlay*/
+    width: 500px;
+    max-width: 80%;
+}
+
+#modal-submit-btn {
+    background-color: rgba(170, 154, 154, 0.164);
+    font-weight: bold;
+}
+
+.modal.active{
+    transform: translate(-50%,-50%) scale(1);   /*centers and shows modal*/
+}
+
+.modal-header{
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid black;
+}
+
+.modal-header .title{
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.modal-header .close-button{
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.modal-body{
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+#form_task_name{
+    margin-bottom: 20px;
+}
+
+#form_task_description{
+    margin-bottom: 20px;
+    text-align: top;
+    padding-left: 2px;
+    height: 50px;
+}
+
+#form_task_date{
+    margin-bottom: 20px;
+}
+
+#overlay{
+    /*Screen overlay makes page 50% transparent*/
+    position: fixed;
+    opacity: 0;
+    transition: 200ms ease-in-out;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,.5);
+    pointer-events: none; /*prevents overlay from capturing click events*/
+}
+
+#overlay.active{
+    opacity: 1;
+    pointer-events: all;
+    
+}

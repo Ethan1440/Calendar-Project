@@ -1,0 +1,122 @@
+.calendar-monthview-container {
+    justify-content: center;
+    width: 80%;
+    height: 80%;
+    margin: 0 auto;
+    border: 1px solid black;
+  }
+  
+  .calendar-monthview-container.inactive {
+    transition: 200ms ease-in-out;
+    display: none;
+  }
+  
+  .calendar-header {
+    display: flex;
+    margin-bottom: 50px;
+    width: 80%;
+    flex-direction: row;
+    margin: 0 auto;
+    /* centers content horrizontally*/
+    border: 1px solid black;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgb(41, 216, 158);
+    color: rgb(0, 0, 0);
+  }
+  
+  .calendar-header.inactive {
+    transition: 200ms ease-in-out;
+    display: none;
+  }
+  
+  #calendar-month-year {
+    font-size: 20px;
+    font-weight: bold;
+    user-select: none;
+    position: absolute;
+    flex: 0 1 auto;
+    left: 50%;
+    transform: translate(-50%);
+  }
+  
+  #prev-button {
+    font-size: 15px;
+    width: 30px;
+    user-select: none;
+    position: absolute;
+    flex: 0 1 auto;
+    left: 38.8%;
+    transform: translate(-38.8%);
+  }
+  
+  #next-button {
+    font-size: 15px;
+    width: 30px;
+    user-select: none;
+    gap: 20px;
+    position: absolute;
+    flex: 0 1 auto;
+    left: 61.7%;
+    transform: translate(-61.7%);
+  }
+  
+  #add-assignment {
+    font-size: 15px;
+    margin-left: 3%;
+    user-select: none;
+  }
+  
+  .dayofweek-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* Each column takes 1/7th of the width */
+    /*grid-auto-rows: 30px;*/
+    border-bottom: 2px solid black;
+    width: 100%;
+  }
+  
+  .monthview-grid.inactive {
+    transition: 200ms ease-in-out;
+    transform: scale(0);
+  }
+  
+  .monthview-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* Each column takes 1/7th of the width */
+    grid-auto-rows: 90px;
+    width: 100%;
+  }
+  
+  .calendar-day-button {
+    display: block;
+  }
+  
+  .calendar-day {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+    user-select: none;
+  }
+  
+  .task.inactive{
+    display: none;
+    transform: scale(0);
+  }
+  
+  /*overlay color*/
+  .inactive {
+    color: #585656;
+  }
+  
+  .add-task {
+    margin-top: 20px;
+  }
+
+  .currentDateNum{
+    width: fit-content;
+    background-color: rgb(41, 216, 158);
+    border-radius: 50%;
+    padding: 3px;
+  }

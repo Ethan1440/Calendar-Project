@@ -4,9 +4,10 @@ Simple calendar project developed for Solved. The calendar is only compatible wi
 Notes:
 Data is only saved in the instance the calendar has been loaded in. All tasks will be deleted each time the page is refreshed.
 The script has to be included in the HTML document as you cannot link script files externally from a local storage system to the browser due to internet security.
+I have mainly tested on google, but it also seems to work fine on Microsoft edge and Firefox. I would still recommend using google though.
 
 ##Opening Calendar HTML
-1. Ensure the HTML file and all style sheets (.css) are in the same directory
+1. Ensure the calendar.html file and all style sheets (.css) are in the same directory (folder)
 2. You should be able to open the calendar.html file in Google Chrome and it will launch in the browser.
 3. Alternate option: If you want to see the calendar in live form you can also open it with Visual Studio code, and use the Live Server extension to open the calendar.html file.
 
@@ -27,3 +28,7 @@ The script has to be included in the HTML document as you cannot link script fil
 * month-view indicates if the date contains more tasks than visible, also prevents tasks from being appended to the same day and running off the screen
 * compatible across common desktop viewports
 * January and December month grid generation edge cases addressed
+* current day is highlighted
+* All Task data is required and validated
+   * duplicate tasks are validated in the code
+   * date is validated by the interface, does not allow invalid date to be entered 

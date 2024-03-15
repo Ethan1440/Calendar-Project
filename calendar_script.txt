@@ -1,0 +1,592 @@
+    /*----------------------------------------------------------Month-view Code------------------------------------------------------------------------------------------------------------------------------*/
+
+    /*Task Class
+    This is the class object created to store the data of our tasks in an object.
+    It contains date for name, description, and date. The class has a simple constructor, and getters 
+    for all variables.
+    */
+    class Task {
+      //all vars are strings
+      constructor(name, desc, date) {
+        this.name = name
+        this.date = date
+        this.desc = desc
+      }
+
+      getName() {
+        return this.name
+      }
+
+      getDate() {
+        return this.date
+      }
+
+      getDesc() {
+        return this.desc
+      }
+    }//end task class
+
+    //Global variables for date, allows calendar to open to current month
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+    let currentDay = currentDate.getDate()
+    let currentDateShort = currentYear + "-" + (currentMonth + 1) + "-" + currentDay //date used to identify current date and highlight it on calendar
+    let tasksArray = []; //global array that contains all tasks entered by the user
+    /* generateCalendar
+    This function generates the month view grid of days for the currently selected month. For each day
+    the calendar assigns a day# div, id for the grid box (yyy-mm-dd), and an event listener for double clicks. The function regenerates
+    the month grid every time the month is switched
+    */
+    function generateCalendar() {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ]
+      const monthDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+      const lastMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+      document.getElementById("calendar-month-year").innerText =
+        monthNames[currentMonth] + " " + currentYear;
+      //let calendarGridHTML = ""
+
+      let totalDays = firstDayIndex + monthDays
+      let rowCount = Math.ceil(totalDays / 7)
+
+      //month-view day grid generator
+      const monthGrid = document.getElementById("monthview-grid");
+      monthGrid.innerHTML = "";
+      let idMonth = 0
+      let idYear = currentYear
+      for (let i = 0; i < rowCount * 7; i++) {
+        const dayOfMonth = i - firstDayIndex + 1;
+        const dayElement = document.createElement("div")
+        dayElement.classList.add("calendar-day")
+
+        //if statment checks if the day shold be part of the next month or previous month
+        //create previous and next month days
+        if (i < firstDayIndex || dayOfMonth > monthDays) {
+          //edge case in january to prevent last month decemeber days having a month of zero and current year
+          if (currentMonth == 0 && dayOfMonth < monthDays) {
+            idMonth = 12;
+            idYear = currentYear - 1
+          }
+
+          //edge case in decemeber that indexes january days as month 1 and a year ahead
+          else if (currentMonth == 11 && dayOfMonth > monthDays) {
+            idMonth = 1
+            idYear = currentYear + 1
+          }
+
+          //we want all days after prev + current month to be indexed forward one month as they're in nxt month
+          else if (i == totalDays) {
+            idMonth = currentMonth + 2
+            idYear = currentYear
+          }
+          //prev month day: normal month number; which is already correct # bc of zero index
+          else if (i < totalDays) {
+            idMonth = currentMonth
+            idYear = currentYear
+          }
+          dayElement.classList.add("inactive")
+          dayElement.id = `${idYear}-${idMonth}-${dayOfMonth <= 0 ? lastMonthDays + dayOfMonth : dayOfMonth - monthDays}`
+          dayElement.textContent = dayOfMonth <= 0 ? lastMonthDays + dayOfMonth : dayOfMonth - monthDays;
+          dayElement.addEventListener("dblclick", () => dbleClick(dayElement.id))
+        } else { //day grid box is part of current month
+          //to set id month foward one accounting for zero index of month variable
+          idMonth = currentMonth + 1
+          idYear = currentYear
+
+          dayElement.id = `${idYear}-${idMonth}-${dayOfMonth}`
+          let dayNum = document.createElement("div")
+          dayNum.id = `monthview-daynum-${dayOfMonth}`
+          dayNum.innerText = dayOfMonth
+          if (dayElement.id == currentDateShort) {
+            dayNum.classList.add("currentDateNum")
+          }
+          //dayElement.textContent = dayOfMonth
+          dayElement.appendChild(dayNum)
+          dayElement.addEventListener("dblclick", () => dbleClick(dayElement.id))
+        }
+        monthGrid.appendChild(dayElement)
+      }//end for
+
+      //legacy day generation element
+      //document.getElementById("monthview-grid").innerHTML = calendarGridHTML;
+    }//end func generateCalendar
+
+    /* NextMonth
+    This function indexes foward to the next month. It checks for end of year (dec zero indexed 11) at month 11
+    and increments year if we pass it. Regenerates calendar and updates tasks
+    */
+    function nextMonth() {
+      currentMonth++
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++
+      }
+      generateCalendar()
+      updateTasks()
+    }
+
+    /* PreviousMonth
+   This function indexes backwards to the previous month. It checks for beginning of year (jan zero indexed 0) at month 0
+   and decrements year if we pass it. Regenerates calendar and updates tasks
+   */
+    function previousMonth() {
+      currentMonth--
+      if (currentMonth < 0) {
+        currentMonth = 11
+        currentYear--
+      }
+      generateCalendar()
+      updateTasks()
+    }
+
+    var addTaskForm = document.getElementById("add-Task-Form")
+    var addTaskModal = document.getElementById("add-task-modal")
+    addTaskForm.addEventListener('submit', handleForm)
+    function handleForm(event) {
+      event.preventDefault()
+      returnFormData()
+      addTaskForm.reset()
+    }
+
+    /* ReturnFormData
+    This funtion grabs all information (name, desc, date) from our add Task modal. It converts the date to single digit form when
+    month or day starts with a zero (ex 01-01-2024). The function also prevents returning data if some fields have not been filled out.
+    The function then calls validate Task to validate before calling addTask, updateTasks, and close Modal. If the task is invalid (same name and date as another task),
+    then the user is alert, and no data is saved to the array tasksArray.
+    */
+    function returnFormData() {
+      //error checking: Prevents assignment of data from form when not all fields have been filled
+      let formAtributes = document.getElementById("add-Task-Form").querySelectorAll("[required]")
+      for (let i = 0; i < formAtributes.length; i++) {
+        if (!formAtributes[i].reportValidity()) {
+          return
+        }
+      }//end for
+
+      let dashCTR = 0;
+      let parsedDate = "";
+      var name = document.getElementById("form_task_name").value
+      var desc = document.getElementById("form_task_description").value
+      var date = document.getElementById("form_task_date").value
+
+      //this for loop reformats our date such that days and months of 1 digit do not display to digits
+      //ex 01 = 1
+      //also conforms date to 0 index standard with januaray being 0
+      //2024-03-05
+      var elemsArr = date.split('-');
+      for (let i = 1; i < elemsArr.length; i++) {
+        //elem index's year, month, day
+        let elem = elemsArr[i]
+        //looks at first number of month and dayl; if zero, remove that digit
+        if (elem[0] == '0') {
+          elem = elem[1]
+          elemsArr[i] = elem
+        }
+      }
+      //yyyy-mm-dd or yyyy-m-d
+      date = elemsArr[0] + "-" + elemsArr[1] + "-" + elemsArr[2];
+
+      if (validateTask(name, desc, date)) {
+        addTask(name, desc, date)
+        updateTasks()
+        closeModal(addTaskModal)
+      }
+
+      else {
+        alert("Task already exists with same name and Date. Please choose a different name for the Task.");
+      }
+
+    }//end returnFormData function
+
+    /*---------------------------------------------------Task Management code----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+    /* ValidateTask
+    This function validates whether or not the entered task has the same name and date as an already existing task in tasksArray.
+    If valid returns true, if invalid returns false.
+    */
+    function validateTask(name, desc, date) {
+      //here we check if there already exists a task with the same name and due date, 
+      //if so we will not add a new task
+      let nonRepeatTask = true
+      for (let i = 0; i < tasksArray.length; i++) {
+        //task is invalid
+        if (name == tasksArray[i].getName() && date == tasksArray[i].getDate()) {
+          nonRepeatTask = false
+          break;
+        }
+      }
+
+      return nonRepeatTask
+    }
+
+    /*addTask
+    Add task adds a task to the array by creating a temp task object and pushing it to the arraylist. This function
+    is always called after validatetask returns true.
+    */
+    function addTask(name, desc, date) {
+      //add to tasks array and update calendar html
+      let tempTask = new Task(name, desc, date)
+      tasksArray.push(tempTask)
+      localStorage.setItem(name, tempTask)
+    }//end func addtask
+
+    /* deleteTask
+    This function deletes the Task from the Array in place using the splice function. It searches for the task with matching date and name,
+    and removes it fron the array. Calls updatetasks when done.
+    */
+    function deleteTask(taskName, date) {
+      //remove task from task array
+      for (let i = 0; i < tasksArray.length; i++) {
+        if (taskName == tasksArray[i].getName() && date == tasksArray[i].getDate()) {
+          //remove task from array
+          tasksArray.splice(i, 1)
+          break
+        }
+      }
+
+      updateTasks()
+    }//end func deleteTask
+
+    /*updateTasks
+    This function updates which tasks are displayed on the current monthview grid. It iterates through the array of tasks 
+    checking for tasks that have a date value matching a grid id on the page. If the task should exist on the page, a div element is created under that day grid 
+    with the tasks name. If a day grid accumulates more than 3 tasks, then three dots "..." is placed under the third task to indicate more tasks exist under that day. 
+    If the day goes below the four task threshold, then the three dots are not printed. This function is called very often, as we want the page info to always be current.
+    */
+    function updateTasks() {
+      let name = ""
+      let date = ""
+      //if array has tasks then we can see wether or not we should write them to the calendar
+      if (tasksArray.length > 0) {
+
+        //this while loop iterates through our task array and extracts the dates from the tasks
+        //then we check if the date id matches a grid on the screen, if so clear that div's children and write a div element with tasks naem to that grid location
+        for (let i = 0; i < tasksArray.length; i++) {
+          let addTask = true
+          let extraTaskBool = false
+          let tmpTask = tasksArray[i]
+          let date = tmpTask.getDate()
+          let name = tmpTask.getName()
+          //if id date matches a calendar grid element && the task does not exist on the page, 
+          let parent = document.getElementById(date)
+          let children = null
+          let extraTaskElem = null
+
+          //preventing null refrence errors when looking at children of parent
+          if (parent == null) {
+            continue
+          }
+          //grabs all children under current day grid so we can look at what tasks are under it
+          else {
+            children = parent.getElementsByTagName('div')
+
+            for (let i = 0; i < children.length; i++) {
+              if (children[i].id == "extra_tasks") {
+                extraTaskBool = true
+                break
+              }
+            }
+
+          }
+
+          //add task to corresponding date grid when no tasks are present at that location
+          if (children.length == 1) {
+            parent.innerHTML += `<div class="task" id="${name}">${name}</div>`
+          }
+
+          //add task to corresponding date grid when 1-2 tasks are present at that location
+          else if (children.length > 1 && children.length < 4) {
+            for (let i = 0; i < children.length; i++) {
+              //set boolearn false if task we are trying to insert exists under current date grid on page
+              if (children[i].id == name) {
+                addTask = false
+                break
+              }
+            }//end for
+
+            if (addTask) {
+              parent.innerHTML += `<div class="task" id="${name}">${name}</div>`
+            }
+          }//end else if
+
+          //adds tasks as invisible elements after 3 tasks exist at that location
+          else if (children.length >= 4) {
+            for (let i = 0; i < children.length; i++) {
+              //set boolearn false if task we are trying to insert exists under current date grid on page
+              if (children[i].id == name) {
+                addTask = false
+                break
+              }
+            }//end for
+
+            if (addTask) {
+              parent.innerHTML += `<div class="task inactive" id="${name}"></div>`
+            }
+
+          }
+          //three dots "..." control for insertion
+          if (children.length > 4 && extraTaskBool == false) {
+            parent.innerHTML += "<div id=\"extra_tasks\">...</div>"
+          }
+          //three dots "..." control for deletion and makes next in-line task visible
+          else if (extraTaskBool == true && children.length <= 5) {
+            for (let i = 0; i < children.length; i++) {
+              if (children[i].classList == "task inactive") {
+                children[i].classList.remove("inactive")
+                children[i].innerHTML = children[i].id
+                break
+              }
+            }
+
+            for (let i = 0; i < children.length; i++) {
+              if (children[i].id == "extra_tasks") {
+                children[i].remove()
+                break
+              }
+            }
+          }
+
+        }//end for loop: iterates through tasks array
+      }
+    }//end func update tasks
+
+    //These two functions are called on HTML Startup to initialize the monthview of the calendar
+    generateCalendar();
+    updateTasks();
+
+    /*--------------------------------------Day-View and associated code------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+    /*dbleClick
+    This function corresponds to each month-view grid box. When each grid box is double clicked, it passes it's id which is the date at that grid location.
+    Then the calendar month-view is hidden so we can show the calendar day-view which will show all tasks for that day.
+    */
+    function dbleClick(date) {
+      hideCalendarShowDayView()
+      generateDayView(date)
+    }//end dbleclk
+
+    /* hideCalendarShowDayView
+    Hides calendar, and shows day view. Adds and removes inactive classes which allows css code to hide or display these elements
+    */
+    function hideCalendarShowDayView() {
+      if (document.getElementsByClassName("calendar-monthview-container") !== null &&
+        document.getElementsByClassName("day-view-container") !== null && document.getElementsByClassName("day-view-header") !== null) {
+        let a = document.getElementsByClassName("calendar-monthview-container")
+        let b = document.getElementsByClassName("day-view-container")
+        let c = document.getElementsByClassName("day-view-header")
+        let d = document.getElementsByClassName("calendar-header")[0]
+        d.classList.add("inactive")
+        //we know theres only one of each element in these class lists, so we can run them all to 
+        //a.length as all lengths are equal and 1
+        for (let i = 0; i < a.length; i++) {
+          a[i].classList.add("inactive")
+          b[i].classList.remove("inactive")
+          c[i].classList.remove("inactive")
+        }
+
+      }//end if
+
+
+    }// end hideCalendarShowDayView()
+
+    /*ShowCalendarHideDayView()
+     Shows calendar, and hides day view. Adds and removes inactive classes which allows css code to hide or display these elements
+    */
+    function ShowCalendarHideDayView() {
+      if (document.getElementsByClassName("calendar-monthview-container") !== null &&
+        document.getElementsByClassName("day-view-container") !== null && document.getElementsByClassName("day-view-header") !== null) {
+        let a = document.getElementsByClassName("calendar-monthview-container")
+        let b = document.getElementsByClassName("day-view-container")
+        let c = document.getElementsByClassName("day-view-header")
+        let d = document.getElementsByClassName("calendar-header")[0]
+        d.classList.remove("inactive")
+        //we know theres only one of each element in these class lists, so we can run them all to 
+        //a.length as all lengths are equal and 1
+        for (let i = 0; i < a.length; i++) {
+          a[i].classList.remove("inactive")
+          b[i].classList.add("inactive")
+          c[i].classList.add("inactive")
+        }
+      }//end if
+    }// end showCalendarHideDayView()
+
+
+    /* generateDayView(date)
+    This function generates the currently clicked day's task list. It displays in a seperate layout each task's name, desc, and due date
+    in contained div elements. All tasks for that day are displayed here with the ability to remove that task from the calendar.
+
+    operation:
+    Looks for tasks matching passed date, and creates a div element diplaying that tasks information. The task also has a delete button that
+    refrences the container div, and calls deleteTask() with the tasks name and date. All tasks appended to a container div that displays them in list view
+    */
+    function generateDayView(date) {
+      const dayViewList = document.getElementById("day-view-container")
+      dayViewList.innerHTML = null
+      const dayViewHeader = document.getElementById("day-view-header-txt")
+      let dayName = new Date(date).toLocaleDateString('en-EN', { weekday: 'long' })
+      let monthName = new Date(date).toLocaleDateString('en-EN', { month: 'long' })
+
+      //reformating date from yyyy-mm-dd to print in dd-mm-yyyy format on screen
+      let HTMLDate = date
+      var elemsArr = date.split('-');
+      HTMLDate = elemsArr[1] + "-" + elemsArr[2] + "-" + elemsArr[0]
+
+      dayViewHeader.innerText = "Tasks for " + dayName + ", " + monthName + " " + elemsArr[2]
+
+      if (tasksArray.length > 0) {
+        for (let i = 0; i < tasksArray.length; i++) {
+          let tmpTask = tasksArray[i]
+          let TSK_date = tmpTask.getDate()
+          let name = tmpTask.getName()
+          let idName = name + "-dayview"
+          let desc = tmpTask.getDesc()
+          //we only want to add tasks for passed day
+          if (TSK_date != date) {
+            continue;
+          }
+
+          //if id name matches a day-view task name, then the task exists on the page
+          //therfore we should not add the task twice
+          if (document.getElementById(idName) !== null) {
+            continue;
+          }
+
+          //create div to contain task element
+          const taskDiv = document.createElement("div")
+          taskDiv.classList.add("task-container")
+          dayViewList.appendChild(taskDiv)
+          //create name,date,desc container divs for each task
+          let taskNameDiv = document.createElement('div')
+          let taskDescDiv = document.createElement('div')
+          let taskDateDiv = document.createElement('div')
+          //add all elements as children of this tasks container
+          taskDiv.appendChild(taskNameDiv)
+          taskDiv.appendChild(taskDescDiv)
+          taskDiv.appendChild(taskDateDiv)
+          //add data and class parameters to elements
+          taskNameDiv.classList.add("task-name")
+          taskNameDiv.id = idName
+          taskDescDiv.classList.add("task-desc")
+          taskDateDiv.classList.add("task-date")
+          taskNameDiv.innerHTML = "<b>Task: </b>" + name
+          taskDescDiv.innerHTML = "<b>Description: </b>" + desc
+          taskDateDiv.innerHTML = "<b> Due Date: </b>" + HTMLDate
+
+          //add delete button to container
+          let delButton = document.createElement('button')
+          delButton.innerText = "X"
+          delButton.classList.add("button")
+          delButton.classList.add("disable-hover")
+          delButton.classList.add("day-view")
+          delButton.id = name + "-delbutton"
+          //The function removes task card from day view and calls remove task, which removes from month view
+          //and from array
+
+          delButton.addEventListener('click', function () {
+            let removeEl = this.parentElement
+            //remove card from day view
+            removeEl.remove()
+            //remove task from calendar view
+
+            if (document.getElementById(date) !== null) {
+              let dayGrid = document.getElementById(date)
+              let children = dayGrid.getElementsByTagName("div")
+              for (let i = 0; i < children.length; i++) {
+                if (children[i].id == name) {
+                  children[i].remove()
+                  break
+                }
+              }
+
+            }
+            else {
+              console.log("task: " + taskName + " not found")
+            }
+            //calls delete task which removes task from the array
+            deleteTask(name, date)
+          })//end onclick function
+
+          taskDiv.appendChild(delButton)
+
+
+        }//end for
+      }//end array size > 0 if
+    }//end function
+
+    /*--------------------------------------Modal functionailty-----------------------------------------------------------*/
+    const openModalButtons = document.querySelectorAll('[data-modal-target]')
+    const closeModalButtons = document.querySelectorAll('[data-close-button]')
+    const closeModal_IgnoreFields = document.querySelectorAll('[data-close-button-ignoreFields]')
+    const overlay = document.getElementById('overlay')
+    //adds eventlisteners to all buttons with corresponding data tag
+    openModalButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = document.querySelector(button.dataset.modalTarget)
+        openModal(modal)
+      })
+    })
+
+    //adds eventlisteners to all buttons with corresponding data tag
+    closeModalButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = button.closest('.modal') /*finds closest modal container by class*/
+        closeModal(modal)
+      })
+    })
+
+    //adds eventlisteners to all buttons with corresponding data tag. This field is specifically for
+    //the x button on the add task modal. We want it to ignore the fields and close regardless
+    closeModal_IgnoreFields.forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = button.closest('.modal') /*finds closest modal container by class*/
+        closeModalIgnoreFields(modal)
+      })
+    })
+    //opens modal by editing css fields to make passed modal obj display. Also turns on overlay
+    function openModal(modal) {
+      if (modal == null) return
+      modal.classList.add('active')
+      overlay.classList.add('active')
+    }//end func openModal(modal)
+
+    /* closeModal(modal)
+    This function first checks if all form fields on passed modal have been completed, if so the 
+    form is allowed to close. "Closes" by editing css properties. Also turns off overlay
+    */
+    function closeModal(modal) {
+      if (modal == null) return
+      //error checking: Prevents modal from closing when not all form fields have been filled
+      let formAtributes = document.getElementById("add-Task-Form").querySelectorAll("[required]")
+      if (formAtributes != null) {
+        for (let i = 0; i < formAtributes.length; i++) {
+          //if any of the data fields has not been filled out, return and don't close modal
+          if (!formAtributes[i].reportValidity()) {
+            return
+          }
+        }//end for
+        modal.classList.remove('active')
+        overlay.classList.remove('active')
+      }
+    }//end func closeModal(modal)
+
+    //exact same as closeModal(modal) except without the form field checking
+    function closeModalIgnoreFields(modal) {
+      if (modal == null) return
+      modal.classList.remove('active')
+      overlay.classList.remove('active')
+    }//end closeModalIgnoreFields(modal)

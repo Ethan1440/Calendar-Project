@@ -1,5 +1,5 @@
 # Calendar-Project
-Simple calendar project developed for Solved. The calendar is only compatible with desktop screen sizes.
+Simple calendar project developed for Solved interview process. The calendar is only compatible with desktop screen sizes.
 
 Notes:
 * The script had to be cut from the html file as google and Windows Defender were flaging it with a false positive for viruses.
